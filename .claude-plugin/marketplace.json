@@ -1,0 +1,16 @@
+{
+  "name": "ray-agent-plugins",
+  "owner": {
+    "name": "Ray Shan"
+  },
+  "metadata": {
+    "description": "Personal tools to augment AI coding agents"
+  },
+  "plugins": [
+    {
+      "name": "ray-plugins",
+      "source": "./ray-plugins",
+      "description": "Safety hooks to block dangerous bash commands"
+    }
+  ]
+}

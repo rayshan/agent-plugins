@@ -2,19 +2,18 @@
 
 Personal Claude Code plugin marketplace.
 
-## Plugins
-
-### ray-plugins
-
-Personal tools to augment AI coding agents.
-
-**Hooks:**
-- `block-dangerous-commands` - Blocks `rm`, `sudo`, `chmod 777` with safer alternatives
-
 ## Installation
 
 ```bash
-claude --plugin-dir /path/to/plugin-name
+# Add marketplace
+/plugin marketplace add /path/to/agent-plugins
+
+# Install a plugin
+/plugin install ray-plugins@ray-agent-plugins
 ```
 
-Or add plugins to `~/.claude/plugins/`.
+## Plugins
+
+| Plugin | Description |
+|--------|-------------|
+| [ray-plugins](./ray-plugins) | Safety hooks to block dangerous bash commands |
