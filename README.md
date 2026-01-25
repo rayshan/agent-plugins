@@ -9,11 +9,11 @@ Personal Claude Code plugin marketplace.
 /plugin marketplace add /path/to/agent-plugins
 
 # Install a plugin
-/plugin install ray-plugins@ray-agent-plugins
+/plugin install ray-agent-plugins
 ```
 
 ## Plugins
 
 | Plugin | Description |
 |--------|-------------|
-| [ray-plugins](./ray-plugins) | Safety hooks and productivity commands |
+| [ray-agent-plugins](./ray-agent-plugins) | Safety hooks and productivity commands |

@@ -1,11 +1,11 @@
-# ray-plugins
+# ray-agent-plugins
 
 Safety hooks and productivity commands for Claude Code.
 
 ## Installation
 
 ```bash
-/plugin install ray-plugins@ray-agent-plugins
+/plugin install ray-agent-plugins
 ```
 
 ## Commands
@@ -18,7 +18,7 @@ Safety hooks and productivity commands for Claude Code.
 
 | Skill | Description |
 |-------|-------------|
-| `/ray-plugins:bump-plugin-version` | Bump a plugin's version (major/minor/patch/exact) |
+| `/ray-agent-plugins:bump-plugin-version` | Bump a plugin's version (major/minor/patch/exact) |
 
 ## Hooks
 

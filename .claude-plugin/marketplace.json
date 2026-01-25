@@ -8,8 +8,8 @@
   },
   "plugins": [
     {
-      "name": "ray-plugins",
-      "source": "./ray-plugins",
+      "name": "ray-agent-plugins",
+      "source": "./ray-agent-plugins",
       "description": "Safety hooks to block dangerous bash commands"
     }
   ]
