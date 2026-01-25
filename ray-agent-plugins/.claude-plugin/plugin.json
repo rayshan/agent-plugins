@@ -2,6 +2,6 @@
   "name": "ray-agent-plugins",
   "version": "2.1.0",
   "description": "Safety hooks and productivity commands for Claude Code",
-  "hooks": "../hooks/hooks.json",
-  "commands": "../commands"
+  "hooks": "./hooks/hooks.json",
+  "commands": "./commands"
 }

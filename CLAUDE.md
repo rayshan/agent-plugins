@@ -34,4 +34,7 @@ Each plugin follows Claude Code plugin conventions:
 	- `/plugin-dev:mcp-integration` for integrating MCP servers
 	- `/plugin-dev:plugin-settings` when I ask about Claude Code plugins
 	- `/plugin-dev:skill-development` for developing Skills
-- When developing Skills and Commands, you MUST also load this official documentation: https://code.claude.com/docs/en/skills.md
+- When developing Skills and Commands, you MUST also read this official documentation first: https://code.claude.com/docs/en/skills.md
+- Every time you update a plugin:
+	- Run the `plugin-dev:plugin-validator` agent.
+	- Review the plugin manifest schema at https://code.claude.com/docs/en/plugins-reference.md, then update `plugin.json`.
