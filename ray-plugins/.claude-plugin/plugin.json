@@ -1,0 +1,9 @@
+{
+  "name": "ray-plugins",
+  "version": "0.1.0",
+  "description": "Personal tools to augment AI coding agents",
+  "author": {
+    "name": "Ray Shan"
+  },
+  "keywords": ["safety", "hooks", "productivity"]
+}
