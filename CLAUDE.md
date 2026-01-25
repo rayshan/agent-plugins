@@ -17,6 +17,7 @@ Each plugin follows Claude Code plugin conventions:
 - `hooks/hooks.json` - hook configuration (use `${CLAUDE_PLUGIN_ROOT}` for paths)
 - `hooks/*.sh` - hook scripts (co-locate tests as `*.test.bats`)
 - `commands/*.md` - command files (YAML frontmatter + markdown instructions)
+- `skills/<skill-name>/SKILL.md` - skills (NOT `.claude/skills/` which is for standalone/personal skills)
 
 ## Testing
 
@@ -33,3 +34,4 @@ Each plugin follows Claude Code plugin conventions:
 	- `/plugin-dev:mcp-integration` for integrating MCP servers
 	- `/plugin-dev:plugin-settings` when I ask about Claude Code plugins
 	- `/plugin-dev:skill-development` for developing Skills
+- When developing Skills and Commands, you MUST also load this official documentation: https://code.claude.com/docs/en/skills.md

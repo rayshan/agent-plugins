@@ -14,6 +14,12 @@ Safety hooks and productivity commands for Claude Code.
 |---------|-------------|
 | `/update-docs` | Revise CLAUDE.md and README.md to reflect latest changes |
 
+## Skills
+
+| Skill | Description |
+|-------|-------------|
+| `/ray-plugins:bump-plugin-version` | Bump a plugin's version (major/minor/patch/exact) |
+
 ## Hooks
 
 ### block-dangerous-commands
