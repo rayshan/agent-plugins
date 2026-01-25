@@ -17,7 +17,7 @@ make_input() {
 @test "blocks basic rm command" {
     result=$(make_input "Bash" "rm file.txt" | bash "$SCRIPT")
     [[ "$result" == *'"decision": "block"'* ]]
-    [[ "$result" == *'TRASH'* ]]
+    [[ "$result" == *'~/.trash/'* ]]
 }
 
 @test "blocks rm -rf" {

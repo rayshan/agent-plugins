@@ -61,14 +61,11 @@ check_chmod_777() {
 #   Reason text to stdout
 get_rm_reason() {
   cat << 'EOF'
-rm command blocked. Instead:
-- MOVE files to a TRASH/ folder in the current directory (create if needed)
-- Log the action in TRASH-FILES.md with: filename, destination, reason
+rm command blocked. Instead, move files to ~/.trash/ with timestamp suffix:
+  mkdir -p ~/.trash && mv <file> ~/.trash/<filename>.<timestamp>
 
-Example entry:
-```
-test_script.py - moved to TRASH/ - temporary test script
-```
+Example:
+  mkdir -p ~/.trash && mv script.py ~/.trash/script.py.$(date +%Y%m%d_%H%M%S)
 EOF
 }
 
