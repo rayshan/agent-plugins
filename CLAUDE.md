@@ -19,6 +19,10 @@ Each plugin follows Claude Code plugin conventions:
 - `commands/*.md` - command files (YAML frontmatter + markdown instructions)
 - `skills/<skill-name>/SKILL.md` - skills (NOT `.claude/skills/` which is for standalone/personal skills)
 
+Skill frontmatter tips:
+- `disable-model-invocation: true` - use for manual workflows with side effects (file edits, deploys, commits)
+- Skills are auto-discovered from `skills/` directory; no need to add to plugin.json
+
 ## Testing
 
 - Shell scripts: `shellcheck <script>` then `bats <script>.test.bats`
@@ -36,5 +40,4 @@ Each plugin follows Claude Code plugin conventions:
 	- `/plugin-dev:skill-development` for developing Skills
 - When developing Skills and Commands, you MUST also read this official documentation first: https://code.claude.com/docs/en/skills.md
 - Every time you update a plugin:
-	- Run the `plugin-dev:plugin-validator` agent.
 	- Review the plugin manifest schema at https://code.claude.com/docs/en/plugins-reference.md, then update `plugin.json`.

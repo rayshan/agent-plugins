@@ -1,5 +1,7 @@
 ---
-description: Revise CLAUDE.md and README.md to reflect latest changes
+name: update-docs
+description: Update project documentation (CLAUDE.md and README.md) to reflect the current codebase state. Use after completing features, refactoring, or when documentation is stale.
+disable-model-invocation: true
 allowed-tools: Read, Edit, Glob, Skill
 ---
 

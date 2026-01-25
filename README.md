@@ -1,6 +1,6 @@
 # agent-plugins
 
-Personal Claude Code plugin marketplace.
+My personal Claude Code plugin marketplace that contains tools to augment AI agents.
 
 ## Installation
 
@@ -16,4 +16,4 @@ Personal Claude Code plugin marketplace.
 
 | Plugin | Description |
 |--------|-------------|
-| [ray-agent-plugins](./ray-agent-plugins) | Safety hooks and productivity commands |
+| [ray-agent-plugins](./ray-agent-plugins) | Personal tools to augment AI coding agents |
