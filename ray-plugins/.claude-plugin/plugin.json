@@ -1,6 +1,7 @@
 {
   "name": "ray-plugins",
-  "version": "1.0.0",
-  "description": "Safety hooks to block dangerous bash commands",
-  "hooks": "../hooks/hooks.json"
+  "version": "2.0.0",
+  "description": "Safety hooks and productivity commands for Claude Code",
+  "hooks": "../hooks/hooks.json",
+  "commands": "../commands"
 }

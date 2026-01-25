@@ -16,4 +16,4 @@ Personal Claude Code plugin marketplace.
 
 | Plugin | Description |
 |--------|-------------|
-| [ray-plugins](./ray-plugins) | Safety hooks to block dangerous bash commands |
+| [ray-plugins](./ray-plugins) | Safety hooks and productivity commands |

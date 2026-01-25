@@ -1,12 +1,18 @@
 # ray-plugins
 
-Safety hooks to block dangerous bash commands.
+Safety hooks and productivity commands for Claude Code.
 
 ## Installation
 
 ```bash
 /plugin install ray-plugins@ray-agent-plugins
 ```
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `/update-docs` | Revise CLAUDE.md and README.md to reflect latest changes |
 
 ## Hooks
 
