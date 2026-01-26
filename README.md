@@ -17,3 +17,8 @@ My personal Claude Code plugin marketplace that contains tools to augment AI age
 | Plugin | Description |
 |--------|-------------|
 | [ray-agent-plugins](./ray-agent-plugins) | Personal tools to augment AI coding agents |
+
+## TODOs
+- Call Gemini
+	- https://geminicli.com/docs/cli/headless
+	- https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/headless.md

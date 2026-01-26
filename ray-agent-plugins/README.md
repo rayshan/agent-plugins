@@ -14,6 +14,7 @@ Safety hooks and productivity skills for Claude Code.
 |-------|-------------|
 | `/ray-agent-plugins:update-docs` | Update CLAUDE.md and README.md to reflect latest changes |
 | `/ray-agent-plugins:bump-plugin-version` | Bump a plugin's version (major/minor/patch/exact) |
+| `/ray-agent-plugins:get-markdown` | Convert URLs to raw markdown versions to save context |
 
 ## Hooks
 
