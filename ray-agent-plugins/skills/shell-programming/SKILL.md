@@ -7,11 +7,17 @@ description: This skill should be used when the user asks to "write a shell scri
 
 Follow [shell-style-guide.md](shell-style-guide.md) for all formatting, naming, syntax, and documentation rules.
 
-## Testing
+## Tech Stack
 
-Requires `shellcheck` and `bats` installed. If not available, offer to install via Homebrew (ask user for confirmation first).
+- Testing: Bats-core
+- Static analysis / linter: ShellCheck
 
-Run static analysis and tests:
+## General Rules
+
+- Always run health checks: static analysis, tests, make sure everything pass.
+- Requires `shellcheck` and `bats` installed. If not available, offer to install via Homebrew (ask user for confirmation first).
+
+Run health checks:
 ```bash
 shellcheck script.sh
 bats script.test.bats

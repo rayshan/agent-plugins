@@ -5,6 +5,10 @@
 
 # Project rules
 
+## Tech stack
+
+- Primary language: shell scripts and markdown instructions
+
 ## Marketplace structure
 
 - `.claude-plugin/marketplace.json` - marketplace catalog (name, owner, plugins array)
