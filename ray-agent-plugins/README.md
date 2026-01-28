@@ -18,6 +18,12 @@ Safety hooks and productivity skills for Claude Code.
 | `/ray-agent-plugins:shell-programming` | Shell scripting best practices based on Google Shell Style Guide |
 | `/ray-agent-plugins:audio-normalize` | Normalize audio volume using ffmpeg's two-pass loudnorm filter |
 
+## Agents
+
+| Agent | Description |
+|-------|-------------|
+| `code-simplifier` | Aggressive code refactoring specialist that reduces complexity and enforces idiomatic patterns |
+
 ## Hooks
 
 ### block-dangerous-commands

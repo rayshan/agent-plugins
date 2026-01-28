@@ -22,6 +22,7 @@ Each plugin follows Claude Code plugin conventions:
 - `hooks/*.sh` - hook scripts (co-locate tests as `*.test.bats`)
 - `commands/*.md` - command files (YAML frontmatter + markdown instructions)
 - `skills/<skill-name>/SKILL.md` - skills (NOT `.claude/skills/` which is for standalone/personal skills)
+- `agents/<agent-name>.md` - agents (auto-discovered, require name/description/model/color in frontmatter)
 
 Skill frontmatter tips:
 - `disable-model-invocation: true` - use for manual workflows with side effects (file edits, deploys, commits)
