@@ -1,0 +1,19 @@
+// swift-tools-version: {{SWIFT_TOOLS_VERSION}}
+
+import PackageDescription
+
+let package = Package(
+    name: "{{MODULE_NAME}}",
+    platforms: [
+        .macOS(.v{{MACOS_VERSION}})
+    ],
+    targets: [
+        .executableTarget(
+            name: "{{MODULE_NAME}}"
+        ),
+        .testTarget(
+            name: "{{MODULE_NAME}}Tests",
+            dependencies: ["{{MODULE_NAME}}"]
+        ),
+    ]
+)

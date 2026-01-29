@@ -28,10 +28,19 @@ Skill frontmatter tips:
 - `disable-model-invocation: true` - use for manual workflows with side effects (file edits, deploys, commits)
 - Skills are auto-discovered from `skills/` directory; no need to add to plugin.json
 
+Large skill organization:
+- `SKILL.md` - workflow instructions only, reference supporting files
+- `templates/` - template files with `{{PLACEHOLDER}}` syntax
+- `scripts/` - shell scripts (testable with shellcheck/bats)
+
 ## Testing
 
 - Shell scripts: `shellcheck <script>` then `bats <script>.test.bats`
 - Co-locate test files with source files
+
+## Shell patterns
+
+- Template substitution: use `${var//\{\{PLACEHOLDER\}\}/${value}}` (shell builtins) instead of sed to avoid escaping issues with `/`, `&`, `\` in values
 
 ## Other
 

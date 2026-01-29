@@ -1,0 +1,9 @@
+import Testing
+
+@testable import {{MODULE_NAME}}
+
+@Test
+func appLaunches() async throws {
+    // Basic test to verify the app module compiles and links correctly
+    #expect(true)
+}

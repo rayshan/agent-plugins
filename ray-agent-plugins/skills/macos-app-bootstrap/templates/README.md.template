@@ -1,0 +1,52 @@
+# {{APP_NAME}}
+
+TK - Project description
+
+## Build
+
+```bash
+# Debug build
+swift build
+
+# Release build
+swift build -c release
+```
+
+## Test
+
+```bash
+swift test
+```
+
+## Create App Bundle
+
+After building, create the `.app` bundle using the provided script:
+
+```bash
+./scripts/create-bundle.sh
+```
+
+Or manually:
+
+```bash
+swift build -c release
+mkdir -p "{{BUNDLE_FILE_NAME}}/Contents/MacOS"
+cp ".build/release/{{MODULE_NAME}}" "{{BUNDLE_FILE_NAME}}/Contents/MacOS/"
+# Then create Info.plist (see scripts/create-bundle.sh)
+```
+
+## Install
+
+Copy the `.app` bundle to Applications:
+
+```bash
+cp -r "{{BUNDLE_FILE_NAME}}" /Applications/
+```
+
+## Open in Xcode
+
+This project can be opened in Xcode:
+
+```bash
+open Package.swift
+```
