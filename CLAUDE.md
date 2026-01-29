@@ -42,6 +42,11 @@ Large skill organization:
 
 - Template substitution: use `${var//\{\{PLACEHOLDER\}\}/${value}}` (shell builtins) instead of sed to avoid escaping issues with `/`, `&`, `\` in values
 
+## Hook patterns
+
+- Auto-skill activation: PreToolUse hooks can output plain text instructions telling Claude to use `Skill()` - simpler than injecting skill content via JSON `additionalContext`
+- Reference: https://github.com/spences10/claude-code-toolkit for hook examples
+
 ## Other
 
 - Go back to default command line tools when developing something that is meant to be shared with others, e.g. Claude Code marketplace plugins, when these better tools may not be present. E.g. use `find` instead of `fd`.

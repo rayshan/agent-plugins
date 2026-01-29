@@ -1,5 +1,5 @@
 {
-  "description": "Safety hooks to block dangerous bash commands",
+  "description": "Safety hooks and auto-skill injection",
   "hooks": {
     "PreToolUse": [
       {
@@ -9,6 +9,16 @@
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/block-dangerous-commands.sh",
             "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/inject-shell-skill.sh",
+            "timeout": 5
           }
         ]
       }

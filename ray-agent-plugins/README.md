@@ -36,3 +36,7 @@ Intercepts bash commands and blocks:
 | `rm` | Data loss | Move to `~/.trash/` with timestamp suffix |
 | `sudo` | Privilege escalation | Check if elevated privileges are needed |
 | `chmod 777` | Insecure permissions | Use `755` (dirs) or `644` (files) |
+
+### inject-shell-skill
+
+Auto-activates the `shell-programming` skill when writing or editing shell scripts (`.sh`, `.bash`, `.zsh`, `.ksh`, `.bats` or files with shell shebang).
