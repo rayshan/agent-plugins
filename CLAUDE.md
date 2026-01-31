@@ -1,7 +1,6 @@
 # Import rules
 
 - Global software development rules: @~/.claude/AGENTS-global.md
-- Global shell script development rules: @~/.claude/AGENTS-global-shell.md
 
 # Project rules
 
