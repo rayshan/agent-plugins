@@ -17,7 +17,7 @@ Safety hooks and productivity skills for Claude Code.
 | `/ray-agent-plugins:bump-plugin-version` | Bump a plugin's version (major/minor/patch/exact) |
 | `/ray-agent-plugins:get-markdown` | Convert URLs to raw markdown versions to save context |
 | `/ray-agent-plugins:shell-programming` | Shell scripting best practices based on Google Shell Style Guide |
-| `/ray-agent-plugins:audio-normalize` | Normalize audio volume using ffmpeg's two-pass loudnorm filter |
+| `/ray-agent-plugins:audio-normalize` | Preprocess and normalize audio for speech transcription using ffmpeg |
 | `/ray-agent-plugins:macos-app-bootstrap` | Bootstrap a macOS desktop app using Swift Package Manager |
 
 ## Agents

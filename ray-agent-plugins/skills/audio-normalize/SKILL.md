@@ -1,72 +1,73 @@
 ---
 name: audio-normalize
-description: This skill should be used when the user asks to "normalize audio", "fix audio volume", "make audio louder", "level audio", or provides an audio file for volume normalization. Uses ffmpeg's loudnorm filter for professional two-pass normalization.
+description: This skill should be used when the user asks to "normalize audio", "prepare audio for transcription", "preprocess audio for speech recognition", "clean audio for transcription", "fix audio volume", "make audio louder", or provides an audio file for volume normalization or transcription preparation. Uses ffmpeg for audio preprocessing and two-pass loudnorm normalization.
 argument-hint: [audio-file-path]
 ---
 
-Normalize audio volume using ffmpeg's two-pass loudnorm filter.
+Preprocess and normalize audio for optimal speech transcription accuracy using ffmpeg. Apply this five-stage pipeline to clean, normalize, and resample audio into a format optimized for transcription models.
 
-## Process
+## Pipeline
 
-1. Analyze audio to measure current loudness levels
-2. Normalize using measured values for accurate results
-3. Output with suffix `_normalized` in same format (or user-specified format)
-4. Display before/after summary
+1. **Mono downmix** — Combine stereo to mono (transcription models expect mono)
+2. **High-pass filter (80 Hz)** — Remove low-frequency rumble carrying no speech information
+3. **Noise reduction (`afftdn`)** — Reduce stationary background noise (room tone, HVAC)
+4. **Loudnorm (two-pass)** — Normalize to consistent loudness level (-16 LUFS)
+5. **Resample to 16 kHz WAV** — Match transcription model expectations (Whisper, etc.)
+
+## Target Levels
+
+Default targets optimized for speech transcription:
+
+- **Integrated loudness**: -16 LUFS
+- **True peak**: -1.5 dBTP
+- **Loudness range**: 11 LU
 
 ## Step 1: Analyze Audio
 
-Run the analysis pass to measure loudness:
+Run the analysis pass through the full filter chain to measure post-processed loudness:
 
 ```bash
-ffmpeg -i "<input-file>" -af "loudnorm=I=-16:LRA=11:TP=-1.5:print_format=summary" -f null -
+ffmpeg -i "<input-file>" -af "pan=mono|c0=0.5*c0+0.5*c1,highpass=f=80,afftdn=nf=-25,loudnorm=I=-16:LRA=11:TP=-1.5:print_format=summary" -f null -
 ```
 
 Parse the output for these values:
-- `Input Integrated` → measured_I (e.g., -22.6)
-- `Input True Peak` → measured_TP (e.g., -2.6)
-- `Input LRA` → measured_LRA (e.g., 19.8)
-- `Input Threshold` → measured_thresh (e.g., -35.1)
+- `Input Integrated` → measured_I
+- `Input True Peak` → measured_TP
+- `Input LRA` → measured_LRA
+- `Input Threshold` → measured_thresh
 
-## Step 2: Normalize Audio
+## Step 2: Process and Normalize
 
-Run the normalization pass with measured values. Choose encoder based on output format:
-
-| Format | Encoder flags |
-|--------|---------------|
-| mp3    | `-c:a libmp3lame -q:a 2` |
-| m4a    | `-c:a aac -b:a 192k` |
-| flac   | `-c:a flac` |
-| wav    | `-c:a pcm_s16le` |
-| ogg    | `-c:a libvorbis -q:a 6` |
+Run the full pipeline with measured loudnorm values:
 
 ```bash
-ffmpeg -i "<input-file>" -af "loudnorm=I=-16:LRA=11:TP=-1.5:measured_I=<measured_I>:measured_LRA=<measured_LRA>:measured_TP=<measured_TP>:measured_thresh=<measured_thresh>" <encoder-flags> "<output-file>"
+ffmpeg -i "<input-file>" -af "pan=mono|c0=0.5*c0+0.5*c1,highpass=f=80,afftdn=nf=-25,loudnorm=I=-16:LRA=11:TP=-1.5:measured_I=<measured_I>:measured_LRA=<measured_LRA>:measured_TP=<measured_TP>:measured_thresh=<measured_thresh>" -ar 16000 -c:a pcm_s16le "<output-file>"
 ```
 
-Output file: Same directory, base name with `_normalized` suffix, same extension as input (e.g., `audio.m4a` → `audio_normalized.m4a`).
+Output file: Same directory, base name with `_transcription` suffix, `.wav` extension (e.g., `meeting.m4a` → `meeting_transcription.wav`).
 
 ## Step 3: Display Summary
 
 Present a before/after comparison:
 
 ```
-## Audio Normalization Summary
+## Audio Processing Summary
 
-| Metric           | Before     | Target     |
-|------------------|------------|------------|
-| Integrated       | -22.6 LUFS | -16.0 LUFS |
-| True Peak        | -2.6 dBTP  | -1.5 dBTP  |
-| Loudness Range   | 19.8 LU    | 11.0 LU    |
+| Step             | Detail                    |
+|------------------|---------------------------|
+| Mono downmix     | Stereo → Mono             |
+| High-pass filter | 80 Hz cutoff              |
+| Noise reduction  | afftdn (nf=-25)           |
+| Loudnorm         | <measured_I> → -16.0 LUFS |
+| Resample         | <original_rate> → 16 kHz  |
+| Format           | PCM 16-bit WAV            |
 
-Output: /path/to/audio_normalized.m4a
+Output: /path/to/audio_transcription.wav
 ```
 
-## Target Levels
+## Filter Details
 
-Default targets optimized for podcasts/YouTube/general streaming:
-
-- **Integrated loudness**: -16 LUFS
-- **True peak**: -1.5 dBTP (headroom for lossy encoding)
-- **Loudness range**: 11 LU
-
-Other platform standards for reference: Spotify/YouTube (-14 LUFS), broadcast EBU R128 (-23 LUFS).
+- **`pan=mono|c0=0.5*c0+0.5*c1`** — Equal mix of left and right channels
+- **`highpass=f=80`** — Butterworth high-pass, removes sub-80 Hz rumble
+- **`afftdn=nf=-25`** — FFT-based denoiser for stationary noise (HVAC, room tone); works best in quiet recording environments
+- **`loudnorm`** — EBU R128 loudness normalization, two-pass for accuracy

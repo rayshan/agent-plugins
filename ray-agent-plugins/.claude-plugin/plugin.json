@@ -1,6 +1,6 @@
 {
   "name": "ray-agent-plugins",
-  "version": "2.9.0",
+  "version": "2.10.0",
   "description": "Safety hooks and productivity skills for Claude Code",
   "homepage": "https://github.com/rayshan/agent-plugins"
 }
