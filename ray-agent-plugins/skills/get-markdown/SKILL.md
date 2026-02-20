@@ -1,16 +1,19 @@
 ---
 name: get-markdown
-description: This skill should be used when the user provides a URL to fetch documentation or web content. Automatically converts URLs to their raw markdown versions to reduce context window usage and eliminate HTML noise. Use when given URLs from GitHub, Claude/Anthropic docs, Gemini CLI docs, Firebase docs, Google dev docs, or OpenAI docs.
+description: This skill should be used when the user provides a URL to fetch web content. Automatically converts URLs to their raw markdown versions to reduce context window usage and eliminate HTML noise. Handles URLs from GitHub, Claude/Anthropic docs, Gemini CLI docs, Firebase docs, Google dev docs, OpenAI docs via rules, and any other URL via Tabstack extraction.
 ---
 
 Fetch the markdown version of a URL to save context and reduce noise.
 
 ## Process
 
-1. Identify the URL pattern from the table below
-2. Transform to the markdown URL
-3. Fetch using WebFetch
-4. Warn if content is a 404 page or cannot be read
+1. Check the URL path extension (ignore query params and anchors):
+   - **Binary files** (`.pdf`, `.doc(x)`, `.xls(x)`, `.ppt(x)`, `.odt`, `.ods`, `.odp`, `.epub`, `.zip`, `.tar`, `.gz`, `.mp3`, `.mp4`, `.mov`, `.avi`, `.mkv`, `.wav`, `.flac`, `.aac`, `.ogg`, `.webm`, `.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`, `.webp`, `.bmp`, `.tiff`, `.ico`): Skip entirely. Tell the user this URL points to a binary file that cannot be converted to markdown.
+   - **Plain text files** (`.md`, `.txt`, `.csv`, `.tsv`, `.log`, `.json`, `.jsonl`, `.xml`, `.yaml`, `.yml`, `.toml`, `.ini`, `.cfg`, `.conf`, `.rtf`, `.rst`, `.adoc`, `.tex`, `.sh`, `.py`, `.js`, `.ts`, `.go`, `.rs`, `.rb`, `.java`, `.kt`, `.c`, `.h`, `.cpp`, `.css`, `.html`, `.sql`): Fetch directly with WebFetch — no transformation needed.
+2. Identify the URL pattern from the table below
+3. If a pattern matches, transform to the markdown URL and fetch using WebFetch
+4. If no pattern matches, use the Tabstack fallback (see below)
+5. Warn if content is a 404 page or cannot be read
 
 ## URL Transformation Rules
 
@@ -29,7 +32,21 @@ Fetch the markdown version of a URL to save context and reduce noise.
 - **Trailing slashes**: Strip before transformation (e.g., `geminicli.com/docs/cli/headless/` → `headless`)
 - **URL anchors**: Strip `#anchor` fragments before adding `.md` extension
 - **Query parameters**: Strip `?params` before transformation
-- **Unknown patterns**: If URL does not match any pattern, fetch as-is with WebFetch and inform user that no markdown conversion was available
+- **Unknown patterns**: If URL does not match any pattern, use the Tabstack fallback
+
+## Tabstack Fallback
+
+For URLs that don't match any predefined pattern, extract markdown using the Tabstack API via Bash:
+
+```sh
+curl -s -X POST https://api.tabstack.ai/v1/extract/markdown \
+  -H "Authorization: Bearer $(op read 'op://Carta personal/Tabstack for MCP/credential')" \
+  -H "Content-Type: application/json" \
+  -d '{"url": "URL_HERE", "metadata": true}' \
+  | jq -r '.content'
+```
+
+The `metadata: true` flag returns the markdown content separately from page metadata, and `jq -r '.content'` extracts just the markdown.
 
 ## Error Handling
 
@@ -38,7 +55,8 @@ After fetching, check for:
 1. **404 responses**: Warn "The markdown URL returned a 404. The page may not exist or the URL pattern may have changed."
 2. **Empty content**: Warn "The markdown URL returned empty content."
 3. **HTML instead of markdown**: If response contains `<!DOCTYPE` or `<html`, warn "The URL returned HTML instead of markdown. The transformation pattern may be incorrect."
+4. **Tabstack API errors**: If curl returns a JSON error (e.g., `{"error": "..."}`) or a non-zero exit code, warn with the error message. Common errors: 401 (invalid API key), 422 (malformed URL), 500 (fetch failure).
 
 ## Output
 
-After successful fetch, present the content to the user. If there were warnings, display them prominently before the content.
+After successful fetch, present the content to the user. If there were warnings or errors, display them prominently before the content.
