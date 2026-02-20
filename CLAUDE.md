@@ -7,6 +7,7 @@
 ## Tech stack
 
 - Primary language: shell scripts and markdown instructions
+- Use the `shell-programming` skill for working with shell scripts.
 
 ## Marketplace structure
 
@@ -40,6 +41,8 @@ Large skill organization:
 ## Shell patterns
 
 - Template substitution: use `${var//\{\{PLACEHOLDER\}\}/${value}}` (shell builtins) instead of sed to avoid escaping issues with `/`, `&`, `\` in values
+- macOS ships bash 3.2: avoid bash 4+ features like `${var,,}` (lowercase), `${var^^}` (uppercase), associative arrays, `readarray`. Use `tr '[:upper:]' '[:lower:]'` for case conversion.
+- Script testability: use `if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then main "$@"; fi` (instead of bare `main "$@"`) to allow sourcing functions in bats tests.
 
 ## Hook patterns
 
