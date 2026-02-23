@@ -15,7 +15,7 @@ Use AskUserQuestion to collect these values (show defaults):
 |---------|---------|-------|
 | App name | `My App` | Display name |
 | Bundle file name | `My App.app` | The `.app` file name |
-| Bundle ID | `com.rayshan.myapp` | Use all lowercase |
+| Bundle ID | `com.author.myapp` | Use all lowercase |
 | Swift version | `6+` | Swift tools version |
 | macOS version | `Sequoia 15` | Deployment target |
 

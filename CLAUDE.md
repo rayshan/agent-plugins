@@ -51,6 +51,11 @@ Large skill organization:
 
 ## Other
 
+<EXTREMELY-IMPORTANT>
+This project absolutely CANNOT contain PII and company-specific info.
+Exceptions: project author name, gitignored files, reference to 1Password objects (must use Vault ID instead of Vault name).
+</EXTREMELY-IMPORTANT>
+
 - Go back to default command line tools when developing something that is meant to be shared with others, e.g. Claude Code marketplace plugins, when these better tools may not be present. E.g. use `find` instead of `fd`.
 - You MUST load these skills when relevant:
 	- `/plugin-dev:agent-development` for developing Agents

@@ -171,7 +171,7 @@ fetch_tabstack() {
   local url="${1}"
 
   local api_key
-  api_key=$(op read 'op://Carta personal/Tabstack for MCP/credential')
+  api_key=$(op read 'op://lca2ublql6gpxdmhfqr2cpdwue/Tabstack for MCP/credential')
 
   local payload
   payload=$(jq --null-input --arg url "${url}" '{"url": $url, "metadata": true}')
