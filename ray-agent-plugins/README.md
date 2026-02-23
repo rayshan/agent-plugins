@@ -18,6 +18,7 @@ Safety hooks and productivity skills for Claude Code.
 | `/ray-agent-plugins:get-markdown` | Convert URLs to markdown (predefined patterns + Tabstack fallback for any URL) |
 | `/ray-agent-plugins:shell-programming` | Shell scripting best practices based on Google Shell Style Guide |
 | `/ray-agent-plugins:audio-normalize` | Preprocess and normalize audio for speech transcription using ffmpeg |
+| `/ray-agent-plugins:name-files` | Cross-platform filename validation (safe characters, reserved names, length limits) |
 | `/ray-agent-plugins:macos-app-bootstrap` | Bootstrap a macOS desktop app using Swift Package Manager |
 
 ## Agents
