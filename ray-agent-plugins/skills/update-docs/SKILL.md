@@ -16,6 +16,7 @@ Invoke the `/claude-md-management:revise-claude-md` skill using the Skill tool t
 After CLAUDE.md updates are complete, find all README.md files:
 
 For each README.md, verify:
+
 - **Relevance**: Content reflects the current project state
 - **Accuracy**: Installation steps, usage examples, and descriptions are correct
 - **No overlap with CLAUDE.md**: README is for humans (installation, usage, features); CLAUDE.md is for Claude (development patterns, commands, gotchas)
@@ -24,7 +25,7 @@ For each README.md, verify:
 
 Show proposed changes in diff format:
 
-```
+```text
 ### Update: ./README.md
 
 **Why:** [one-line reason]

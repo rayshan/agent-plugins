@@ -31,6 +31,7 @@ ffmpeg -i "<input-file>" -af "pan=mono|c0=0.5*c0+0.5*c1,highpass=f=80,afftdn=nf=
 ```
 
 Parse the output for these values:
+
 - `Input Integrated` → measured_I
 - `Input True Peak` → measured_TP
 - `Input LRA` → measured_LRA
@@ -50,7 +51,7 @@ Output file: Same directory, base name with `_transcription` suffix, `.wav` exte
 
 Present a before/after comparison:
 
-```
+```text
 ## Audio Processing Summary
 
 | Step             | Detail                    |

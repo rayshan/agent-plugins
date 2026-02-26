@@ -18,6 +18,7 @@ Follow [shell-style-guide.md](shell-style-guide.md) for all formatting, naming, 
 - Requires `shellcheck` and `bats` installed. If not available, offer to install via Homebrew (ask user for confirmation first).
 
 Run health checks:
+
 ```bash
 shellcheck script.sh
 bats script.test.bats

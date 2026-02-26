@@ -5,10 +5,11 @@ My personal Claude Code plugin marketplace that contains tools to augment AI age
 ## Installation
 
 In Claude Code:
+
 - `/plugin`
 - Tab right to Marketplaces
 - \+ Add marketplace
-- Enter https://github.com/rayshan/agent-plugins
+- Enter <https://github.com/rayshan/agent-plugins>
 - Restart Claude Code
 
 From command line:

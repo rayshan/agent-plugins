@@ -20,6 +20,7 @@ Use AskUserQuestion to collect these values (show defaults):
 | macOS version | `Sequoia 15` | Deployment target |
 
 Derive these from user input:
+
 - **Module name**: App name with spaces/special chars removed (e.g., `My App` → `MyApp`)
 - **macOS version number**: Extract from version name (e.g., `Sequoia 15` → `15.0`)
 - **Swift tools version**: Map version to tools version (e.g., `6+` → `6.0`)
@@ -28,7 +29,7 @@ Derive these from user input:
 
 Create this directory structure in the current working directory:
 
-```
+```text
 <project-root>/
 ├── Package.swift
 ├── README.md
@@ -79,7 +80,7 @@ Create `CLAUDE.md` with:
 - Global software development rules: @~/.claude/AGENTS-global.md
 - Global Swift development rules: @~/.claude/AGENTS-global-macos-swift.md
 
-# Project rules
+## Project rules
 
 TK
 ```

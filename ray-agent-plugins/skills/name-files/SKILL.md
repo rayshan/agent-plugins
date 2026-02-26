@@ -24,9 +24,11 @@ Generate filenames with maximum compatibility across modern platforms (Windows, 
 
 1. Determine what the file represents and propose a filename following the rules above.
 2. Validate by running the validation script:
+
    ```bash
    "${CLAUDE_PLUGIN_ROOT}/skills/name-files/scripts/validate-filename.sh" "<proposed-filename>"
    ```
+
 3. If validation reports errors, fix and re-validate.
 4. Present the final filename to the user.
 
