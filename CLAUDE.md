@@ -30,6 +30,7 @@ Skill frontmatter tips:
 
 - `disable-model-invocation: true` - use for manual workflows with side effects (file edits, deploys, commits)
 - Skills are auto-discovered from `skills/` directory; no need to add to plugin.json
+- Testing local skill edits: `/skill-name` loads from `~/.claude/plugins/cache/`, not the local working copy. Use `cc --plugin-dir /path/to/plugin` to test local changes.
 
 Large skill organization:
 
