@@ -63,7 +63,7 @@ Exceptions: project author name, gitignored files, reference to 1Password object
 	- `/plugin-dev:hook-development` for developing Hooks
 	- `/plugin-dev:mcp-integration` for integrating MCP servers
 	- `/plugin-dev:plugin-settings` when I ask about Claude Code plugins
-	- `/plugin-dev:skill-development` for developing Skills
-- When developing Skills, you MUST also read this official documentation first: https://code.claude.com/docs/en/skills.md
+	- `/skill-creator:skill-creator` for developing Skills
+- When developing Skills, you MUST also read this supplement to the `/skill-creator:skill-creator` skill: @./skill-creator-supplement.md
 - Every time you update a plugin:
 	- Review the plugin manifest schema at https://code.claude.com/docs/en/plugins-reference.md, then update `plugin.json`.
