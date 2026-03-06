@@ -20,6 +20,7 @@ Safety hooks and productivity skills for Claude Code.
 | `/ray-agent-plugins:audio-normalize` | Preprocess and normalize audio for speech transcription using ffmpeg |
 | `/ray-agent-plugins:name-files` | Cross-platform filename validation (safe characters, reserved names, length limits) |
 | `/ray-agent-plugins:macos-app-bootstrap` | Bootstrap a macOS desktop app using Swift Package Manager |
+| `/ray-agent-plugins:commit-push-pr-ray` | Commit, push, and open a PR with structured content (exec summary, changes, test coverage) |
 
 ## Agents
 
