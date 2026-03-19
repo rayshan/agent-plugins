@@ -26,13 +26,17 @@ Before submitting the PR, always draft the full PR message and present it for us
 Structure the PR body with these sections:
 
 1. **Exec Summary** — A succinct summary of the business and technical impact, and why. Position for an audience that is non-technical. If user provided you their company info, tailor to user's company's internal audience.
-2. **Summary of Changes** — A list of all changes. Prioritize by business impact and scope (e.g., if the PR ships a major feature and fixes a minor bug, lead with the feature). Do not simply list commits or files changed — the reader can get that from GitHub natively. Synthesize the changes into meaningful descriptions.
-3. **Test Coverage Delta** — What test coverage changed: new tests added, tests modified, coverage increase/decrease.
-4. **Related Work** — Description of related work done, if any (e.g., documentation updates, config changes, migrations).
-5. **Referenced Implementations** — Other implementations referenced or consulted, if any (e.g., upstream libraries, design docs, RFCs).
-6. **Other** — Any other material information (breaking changes, deployment notes, rollback plan, etc.). Omit this section if empty.
+2. **Key design decisions**
+4. **Summary of Changes** — A list of all changes. Prioritize by business impact (e.g., if the PR ships a major feature and fixes a minor bug, lead with the feature). Do not simply list commits or files changed — the reader can get that from GitHub natively. Synthesize the changes into meaningful descriptions.
+  - **Affected user flows**: real end-to-end flows that end-users see. This is used to QA the work.
+  - **Other changes**
+5. **Related Work Done** — Description of related work done (e.g., documentation updates, config changes, migrations).
+6. **TODOs** — Any work intentionally left for the future, and why.
+7. **Test Coverage Delta** — What test coverage changed: new tests added, tests modified, coverage increase/decrease.
+8. **Referenced Implementations** — Other implementations referenced or consulted (e.g., upstream libraries, design docs, RFCs).
+9. **Other** — Any other material information (breaking changes, deployment notes, rollback plan, etc.)
 
-Omit sections 4-6 if they have no content. Do not include empty sections.
+Omit sections if they are not relevant or have no content.
 
 ## Addressing PR Feedback
 
