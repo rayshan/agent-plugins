@@ -1,12 +1,14 @@
 # Import rules
 
 - Global software development rules: @~/.claude/AGENTS-global.md
+- Global python development rules: @~/.claude/AGENTS-global-python.md
 
 ## Project rules
 
 ## Tech stack
 
-- Primary language: shell scripts and markdown instructions
+- Primary language: markdown files, shell scripts and python scripts
+- For scripting, prefer shell, but evaluate both shell and python
 - Use the `shell-programming` skill for working with shell scripts.
 
 ## Marketplace structure
@@ -41,7 +43,10 @@ Large skill organization:
 ## Testing
 
 - Shell scripts: `shellcheck <script>` then `bats <script>.test.bats`
+- Python scripts: `uvx ruff check <script>` then `uvx ruff format <script>` then `uvx pyrefly check <script>` then `uvx pytest <test> -v`
 - Co-locate test files with source files
+- Shell test files: `<script>.test.bats`
+- Python test files: `<script>_test.py`
 
 ## Shell patterns
 
@@ -60,6 +65,12 @@ Large skill organization:
 - All markdown files must pass `rumdl` (format then lint).
 - A project-level PostToolUse hook (`.claude/hooks/lint-markdown.sh`) auto-formats and lints `.md` files after every Write/Edit. If it reports unfixable issues, fix them. If it reports auto-formatting, re-read the file before further edits.
 
+## Claude Code internals
+
+- Project data stored at `~/.claude/projects/<encoded-path>/` where encoding is `re.sub(r'[^a-zA-Z0-9]', '-', absolute_path)`
+- Session transcripts: `<encoded-path>/<uuid>.jsonl`, history index: `~/.claude/history.jsonl`
+- Moving a project directory breaks `--resume`/`--continue` — use `/link-claude-project` skill to reconnect
+
 ## Other
 
 <EXTREMELY-IMPORTANT>
@@ -74,6 +85,6 @@ Exceptions: project author name, gitignored files, reference to 1Password object
   - `/plugin-dev:mcp-integration` for integrating MCP servers
   - `/plugin-dev:plugin-settings` when I ask about Claude Code plugins
   - `/skill-creator:skill-creator` for developing Skills
-- When developing Skills, you MUST also read this supplement to the `/skill-creator:skill-creator` skill: @./skill-creator-supplement.md
+- When developing Skills, or invoking the `/skill-creator` skill, you MUST also read this supplement: @./skill-creator-supplement.md
 - Every time you update a plugin:
   - Review the plugin manifest schema at <https://code.claude.com/docs/en/plugins-reference.md>, then update `plugin.json`.

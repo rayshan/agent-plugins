@@ -21,6 +21,7 @@ Safety hooks and productivity skills for Claude Code.
 | `/ray-agent-plugins:name-files` | Cross-platform filename validation (safe characters, reserved names, length limits) |
 | `/ray-agent-plugins:macos-app-bootstrap` | Bootstrap a macOS desktop app using Swift Package Manager |
 | `/ray-agent-plugins:commit-push-pr-ray` | Commit, push, and open a PR with structured content (exec summary, changes, test coverage) |
+| `/ray-agent-plugins:link-claude-project` | Reconnect a moved/renamed project directory to its Claude Code sessions, memories, and history |
 
 ## Agents
 
