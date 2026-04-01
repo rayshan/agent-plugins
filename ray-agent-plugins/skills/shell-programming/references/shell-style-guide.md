@@ -1,6 +1,6 @@
 # Style Guide (Shell)
 
-Note: this is distilled from the Google Shell Style Guide located at <https://google.github.io/styleguide/shellguide.html>.
+Note: this is distilled from the Google Shell Style Guide located at <https://google.github.io/styleguide/shellguide.md>.
 
 ## I. Files & Interpreter
 

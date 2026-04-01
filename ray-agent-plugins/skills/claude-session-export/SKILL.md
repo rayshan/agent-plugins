@@ -5,7 +5,7 @@ description: This skill should be used when the user asks to "export a session",
   "convert transcript to markdown", or wants to create a readable version of a
   Claude Code session for sharing. Also use when the user provides a session UUID
   and wants it exported, or mentions sharing Claude Code conversations with others.
-argument-hint: <project-path> <session-uuid>
+argument-hint: <project-path> <session-name>
 disable-model-invocation: true
 allowed-tools: Bash(python3 *)
 ---
@@ -17,11 +17,13 @@ for sharing.
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/claude-session-export/scripts/claude_session_export.py" \
-  "<project-path>" "<session-uuid>" [output-file]
+  "<project-path>" "<session-name-or-uuid>" [output-file]
 ```
 
 - **project-path**: Absolute path to the project directory (e.g., `/Users/me/my-project`)
-- **session-uuid**: The session's UUID (e.g., `c26bf741-a517-4f2d-9caf-a67ce4850a54`)
+- **session-name**: A session name substring (e.g., `"cap table chart"`).
+  Case-insensitive, matches against the session's last title. Errors if no match
+  or multiple matches. Also accepts a full UUID.
 - **output-file** (optional): Override the default filename
 
 Default output filename: `claude-transcript-<agent-name-slug>-<YYYY-MM-DD>.md`,
@@ -41,30 +43,13 @@ Skill invocations appear as a short Claude message: `Loaded ⚡️ Skill <name>`
 
 ## Arguments
 
-If the user provides arguments inline (e.g., `/claude-session-export /path uuid`),
-pass `$0` as the project path and `$1` as the session UUID.
+If the user provides arguments inline (e.g., `/claude-session-export /path "cap table"`),
+pass `$0` as the project path and `$1` as the session name.
 
 If no arguments are provided, ask the user for:
 
 1. The project directory path
-2. The session UUID
-
-## Finding session info
-
-Session transcripts live at `~/.claude/projects/<encoded-path>/<uuid>.jsonl`.
-The encoded path replaces all non-alphanumeric characters with hyphens.
-
-To help the user find a session UUID, list recent transcripts:
-
-```bash
-ls -lt ~/.claude/projects/<encoded-path>/*.jsonl | head -10
-```
-
-To peek at a session's title or first prompt:
-
-```bash
-grep -m1 '"custom-title"\|"last-prompt"' ~/.claude/projects/<encoded-path>/<uuid>.jsonl
-```
+2. The session name (or UUID for unnamed sessions)
 
 ## Output format
 

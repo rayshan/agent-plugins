@@ -7,11 +7,15 @@ from unittest.mock import patch
 import pytest
 
 from claude_session_export import (
+    consolidate_mcp_lines,
     encode_project_path,
     export_session,
     extract_assistant_text,
     extract_user_text,
+    format_mcp_notes,
     format_timestamp,
+    parse_mcp_tool,
+    resolve_session,
     slugify,
     strip_system_tags,
 )
@@ -43,6 +47,67 @@ def test_slugify_special_chars():
 
 def test_slugify_empty():
     assert slugify("!!!") == "untitled"
+
+
+# --- resolve_session ---
+
+
+@pytest.fixture()
+def sessions_dir(tmp_path):
+    """Create a fake project dir with multiple session transcripts."""
+    encoded = "-Users-test-my-project"
+    proj_dir = tmp_path / "home" / ".claude" / "projects" / encoded
+    proj_dir.mkdir(parents=True)
+
+    # Session 1: has both title and agent name
+    s1 = proj_dir / "aaaa-1111-bbbb-2222-cccc33334444.jsonl"
+    s1.write_text(
+        json.dumps({"type": "agent-name", "agentName": "mcp app dev"})
+        + "\n"
+        + json.dumps(
+            {"type": "custom-title", "customTitle": "mcp app - cap table chart"}
+        )
+        + "\n"
+    )
+
+    # Session 2: agent name only, shares "mcp" keyword with session 1
+    s2 = proj_dir / "dddd-5555-eeee-6666-ffff77778888.jsonl"
+    s2.write_text(
+        json.dumps({"type": "agent-name", "agentName": "mcp env switcher script"})
+        + "\n"
+    )
+
+    return tmp_path
+
+
+def test_resolve_uuid_passthrough():
+    """UUID identifiers pass through without scanning files."""
+    uuid = "aaaa1111-bb22-cc33-dd44-eeeeffffaaaa"
+    assert resolve_session("/any/path", uuid) == uuid
+
+
+def test_resolve_name_match(sessions_dir):
+    with patch("claude_session_export.Path.home", return_value=sessions_dir / "home"):
+        result = resolve_session("/Users/test/my-project", "cap table")
+    assert result == "aaaa-1111-bbbb-2222-cccc33334444"
+
+
+def test_resolve_name_case_insensitive(sessions_dir):
+    with patch("claude_session_export.Path.home", return_value=sessions_dir / "home"):
+        result = resolve_session("/Users/test/my-project", "ENV SWITCHER SCRIPT")
+    assert result == "dddd-5555-eeee-6666-ffff77778888"
+
+
+def test_resolve_name_no_match(sessions_dir):
+    with patch("claude_session_export.Path.home", return_value=sessions_dir / "home"):
+        with pytest.raises(FileNotFoundError, match="No session matching"):
+            resolve_session("/Users/test/my-project", "nonexistent")
+
+
+def test_resolve_name_multiple_matches(sessions_dir):
+    with patch("claude_session_export.Path.home", return_value=sessions_dir / "home"):
+        with pytest.raises(ValueError, match="Multiple sessions match"):
+            resolve_session("/Users/test/my-project", "mcp")
 
 
 # --- strip_system_tags ---
@@ -77,6 +142,111 @@ def test_strip_returns_none_when_empty():
 
 def test_strip_preserves_clean_text():
     assert strip_system_tags("Just a normal message") == "Just a normal message"
+
+
+# --- parse_mcp_tool ---
+
+
+def test_parse_mcp_basic():
+    assert parse_mcp_tool("mcp__github__pull_request_read") == (
+        "github",
+        "pull_request_read",
+    )
+
+
+def test_parse_mcp_plugin_prefix():
+    assert parse_mcp_tool("mcp__plugin_context7_context7__resolve-library-id") == (
+        "context7",
+        "resolve-library-id",
+    )
+
+
+def test_parse_mcp_claude_ai_prefix():
+    assert parse_mcp_tool("mcp__claude_ai_Gmail__gmail_create_draft") == (
+        "Gmail",
+        "gmail_create_draft",
+    )
+
+
+def test_parse_mcp_not_mcp():
+    assert parse_mcp_tool("Bash") is None
+    assert parse_mcp_tool("Read") is None
+
+
+def test_parse_mcp_too_few_parts():
+    assert parse_mcp_tool("mcp__github") is None
+
+
+# --- format_mcp_notes ---
+
+
+def test_format_mcp_notes_groups_by_server():
+    content = [
+        {"type": "tool_use", "name": "mcp__github__pull_request_read", "id": "1"},
+        {"type": "tool_use", "name": "mcp__github__pull_request_read", "id": "2"},
+        {"type": "tool_use", "name": "mcp__github__pull_request_read", "id": "3"},
+        {
+            "type": "tool_use",
+            "name": "mcp__plugin_context7_context7__resolve-library-id",
+            "id": "4",
+        },
+        {
+            "type": "tool_use",
+            "name": "mcp__plugin_context7_context7__query-docs",
+            "id": "5",
+        },
+    ]
+    result = format_mcp_notes(content)
+    assert "`github` \u2192 `pull_request_read` (\u00d73)" in result
+    assert "`context7` \u2192 `resolve-library-id`, `query-docs`" in result
+
+
+def test_format_mcp_notes_no_mcp():
+    content = [
+        {"type": "tool_use", "name": "Bash", "id": "1"},
+        {"type": "text", "text": "hello"},
+    ]
+    assert format_mcp_notes(content) is None
+
+
+# --- consolidate_mcp_lines ---
+
+
+def test_consolidate_same_server():
+    text = (
+        "Some text.\n\n"
+        "> Used MCP \U0001f50c `context7` \u2192 `resolve-library-id`\n\n"
+        "> Used MCP \U0001f50c `context7` \u2192 `query-docs`"
+    )
+    result = consolidate_mcp_lines(text)
+    assert "Some text." in result
+    assert result.count("> Used MCP") == 1
+    assert "`resolve-library-id`, `query-docs`" in result
+
+
+def test_consolidate_different_servers():
+    text = (
+        "> Used MCP \U0001f50c `github` \u2192 `pull_request_read`\n\n"
+        "> Used MCP \U0001f50c `context7` \u2192 `query-docs`"
+    )
+    result = consolidate_mcp_lines(text)
+    assert result.count("> Used MCP") == 2
+
+
+def test_consolidate_same_tool_counted():
+    text = (
+        "> Used MCP \U0001f50c `github` \u2192 `pull_request_read`\n\n"
+        "> Used MCP \U0001f50c `github` \u2192 `pull_request_read`\n\n"
+        "> Used MCP \U0001f50c `github` \u2192 `pull_request_read`"
+    )
+    result = consolidate_mcp_lines(text)
+    assert result.count("> Used MCP") == 1
+    assert "`pull_request_read` (\u00d73)" in result
+
+
+def test_consolidate_no_mcp():
+    text = "Just plain text."
+    assert consolidate_mcp_lines(text) == text
 
 
 # --- extract_user_text ---
@@ -198,6 +368,44 @@ def test_assistant_multiple_text_blocks():
         }
     }
     assert extract_assistant_text(msg) == "Part one.\n\nPart two."
+
+
+def test_assistant_text_with_mcp():
+    msg = {
+        "message": {
+            "content": [
+                {"type": "text", "text": "Let me check the PR."},
+                {
+                    "type": "tool_use",
+                    "id": "t1",
+                    "name": "mcp__github__pull_request_read",
+                    "input": {},
+                },
+            ]
+        }
+    }
+    result = extract_assistant_text(msg)
+    assert result.startswith("Let me check the PR.")
+    assert "> Used MCP" in result
+    assert "`github`" in result
+
+
+def test_assistant_mcp_only():
+    msg = {
+        "message": {
+            "content": [
+                {
+                    "type": "tool_use",
+                    "id": "t1",
+                    "name": "mcp__github__pull_request_read",
+                    "input": {},
+                },
+            ]
+        }
+    }
+    result = extract_assistant_text(msg)
+    assert result is not None
+    assert "> Used MCP" in result
 
 
 # --- format_timestamp ---
