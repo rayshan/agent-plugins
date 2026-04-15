@@ -1,6 +1,5 @@
 # Import rules
 
-- Global software development rules: @~/.claude/AGENTS-global.md
 - Global python development rules: @~/.claude/AGENTS-global-python.md
 
 ## Project rules
@@ -70,6 +69,7 @@ Large skill organization:
 - Project data stored at `~/.claude/projects/<encoded-path>/` where encoding is `re.sub(r'[^a-zA-Z0-9]', '-', absolute_path)`
 - Session transcripts: `<encoded-path>/<uuid>.jsonl`, history index: `~/.claude/history.jsonl`
 - Moving a project directory breaks `--resume`/`--continue` — use `/link-claude-project` skill to reconnect
+- LSP plugin config: `lspServers` is defined in marketplace catalog (`~/.claude/plugins/marketplaces/<mp>/.claude-plugin/marketplace.json`), not in cached plugin.json. Use `/setup-check-lsp` skill to diagnose LSP issues.
 
 ## Other
 
@@ -85,6 +85,6 @@ Exceptions: project author name, gitignored files, reference to 1Password object
   - `/plugin-dev:mcp-integration` for integrating MCP servers
   - `/plugin-dev:plugin-settings` when I ask about Claude Code plugins
   - `/skill-creator:skill-creator` for developing Skills
-- When developing Skills, or invoking the `/skill-creator` skill, you MUST also read this supplement: @./skill-creator-supplement.md
+- When developing Skills, or invoking the `skill-creator` skill, you MUST also read this supplement: @./skill-creator-supplement.md
 - Every time you update a plugin:
   - Review the plugin manifest schema at <https://code.claude.com/docs/en/plugins-reference.md>, then update `plugin.json`.

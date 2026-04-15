@@ -22,6 +22,7 @@ Safety hooks and productivity skills for Claude Code.
 | `/ray-agent-plugins:macos-app-bootstrap` | Bootstrap a macOS desktop app using Swift Package Manager |
 | `/ray-agent-plugins:commit-push-pr-ray` | Commit, push, and open a PR with structured content (exec summary, changes, test coverage) |
 | `/ray-agent-plugins:link-claude-project` | Reconnect a moved/renamed project directory to its Claude Code sessions, memories, and history |
+| `/ray-agent-plugins:setup-check-lsp` | Diagnose and test Claude Code LSP plugins (config, binaries, live testing) |
 | `/ray-agent-plugins:claude-session-export` | Export a Claude Code session transcript to a shareable markdown file |
 
 ## Agents
