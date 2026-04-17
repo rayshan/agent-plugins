@@ -71,6 +71,10 @@ Large skill organization:
 - Moving a project directory breaks `--resume`/`--continue` — use `/link-claude-project` skill to reconnect
 - LSP plugin config: `lspServers` is defined in marketplace catalog (`~/.claude/plugins/marketplaces/<mp>/.claude-plugin/marketplace.json`), not in cached plugin.json. Use `/setup-check-lsp` skill to diagnose LSP issues.
 
+## External data sources
+
+- X/Twitter: `get-markdown` (Tabstack) returns empty on `x.com` status URLs. Use `api.fxtwitter.com/<handle>/status/<id>` (unauthenticated, returns article payload as JSON) — wrapped by the `export-x-article` skill.
+
 ## Other
 
 <EXTREMELY-IMPORTANT>
