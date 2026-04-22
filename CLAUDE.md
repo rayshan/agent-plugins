@@ -63,6 +63,7 @@ Large skill organization:
 
 - All markdown files must pass `rumdl` (format then lint).
 - A project-level PostToolUse hook (`.claude/hooks/lint-markdown.sh`) auto-formats and lints `.md` files after every Write/Edit. If it reports unfixable issues, fix them. If it reports auto-formatting, re-read the file before further edits.
+- Common rumdl failures: MD024 (duplicate headings — differentiate by appending a short suffix), MD036 (italics/bold used as a pseudo-heading — drop the emphasis or use a real heading), MD059 (non-descriptive link text — avoid bare `[link]`/`[here]`).
 
 ## Claude Code internals
 

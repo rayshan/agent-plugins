@@ -25,6 +25,7 @@ Safety hooks and productivity skills for Claude Code.
 | `/ray-agent-plugins:setup-check-lsp` | Diagnose and test Claude Code LSP plugins (config, binaries, live testing) |
 | `/ray-agent-plugins:claude-session-export` | Export a Claude Code session transcript to a shareable markdown file |
 | `/ray-agent-plugins:export-x-article` | Export an X (Twitter) status or long-form article to a markdown file via the fxtwitter API |
+| `/ray-agent-plugins:export-slack-canvas` | Export a Slack Canvas to a markdown file, inlining each referenced Slack message (only the specific message, not the full thread) |
 
 ## Agents
 
