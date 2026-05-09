@@ -1,6 +1,7 @@
 ---
 name: link-claude-project
 description: This skill should be used when the user asks to "link a project",
+  "rename a project", "rename Claude Code project", "give my project a new name",
   "reconnect project data", "fix project sessions", "recover old sessions",
   "migrate Claude Code project", "moved my project directory", "can't find my old
   sessions", "resume not working after move", or mentions losing Claude Code
@@ -8,118 +9,119 @@ description: This skill should be used when the user asks to "link a project",
   Also use when the user mentions `--resume` or `--continue` not finding old
   conversations after a directory change.
 argument-hint: <new-path> [old-path]
-disable-model-invocation: true
-allowed-tools: Bash(python3 *), Bash(ls *), Bash(find *), Read, Grep, Glob
+allowed-tools: Bash(python3 *), Bash(ls *), Bash(find *), Bash(mv *), Read, Grep, Glob
 ---
 
 # Link Claude Code Project
 
 Reconnect a moved or renamed project directory to its existing Claude Code
-project data (sessions, memories, tool results). Claude Code stores project data
-under `~/.claude/projects/<encoded-path>/` and references the original absolute
-path in `~/.claude/history.jsonl`. When a directory moves, both references go
-stale, breaking `--resume`, `--continue`, and project memory.
+project data (sessions, memories, tool results). Claude Code stores project
+data under `~/.claude/projects/<encoded-path>/` and references the original
+absolute path in `~/.claude/history.jsonl`. When a directory moves, both
+references go stale, breaking `--resume`, `--continue`, and project memory.
+
+The skill handles two flows symmetrically:
+
+- **Already moved/renamed.** The user has already `mv`'d the directory and now
+  wants the Claude Code data relinked.
+- **Pending rename.** The user wants the rename done and the data relinked in
+  one go.
+
+The script detects which case applies from on-disk state. The user's wording
+is only a tiebreaker.
 
 ## Arguments
 
-- `$0` — New project path (required). The current location of the project.
-- `$1` — Old project path (optional). The original location before the move.
+- `$0` — New project path (required). The intended/current location of the
+  project.
+- `$1` — Old project path (optional). The previous location.
 
 ## Workflow
 
-### Step 1: Resolve the new path
+### Step 1: Resolve paths
 
-Resolve `$0` to an absolute path. Verify the directory exists.
+Resolve `$0` to an absolute path. If `$0` is not provided, ask the user.
 
-If `$0` is not provided, ask the user for the new (current) project directory
-path.
-
-### Step 2: Determine the old path
-
-**If `$1` is provided:** use it directly as the old path.
-
-**If `$1` is not provided:** help the user find it. Ask what they remember about
-the original directory — name fragments, parent directory, approximate location.
-Then search for matches:
+If `$1` is provided, use it. Otherwise help the user identify the old path:
 
 ```bash
 ls ~/.claude/projects/ | grep -i "<fragment>"
 ```
 
-Present matching directories decoded back to human-readable paths (reverse the
-encoding: leading dash was `/`, internal dashes were `/`, spaces, `~`, `_`, `=`,
-or other special characters — the encoding is ambiguous so show the raw encoded
-name alongside the decoded guess). Let the user pick.
-
-If there are too many potential matches, narrow down by checking session content:
+The encoding replaces every non-alphanumeric character with a hyphen, so it
+is ambiguous (`/`, space, `~`, `_`, `=` all collapse). Show the encoded names
+alongside best-guess decoded paths and let the user pick. If multiple
+candidates remain, peek at session content:
 
 ```bash
-# Check first user message in each session for context clues
 find ~/.claude/projects/<candidate>/ -maxdepth 1 -name "*.jsonl" -exec head -1 {} \;
 ```
 
-### Step 3: Verify both paths
+### Step 2: Preflight (dry-run)
 
-Before proceeding, confirm:
-
-1. The new directory exists on disk
-2. The old encoded directory exists under `~/.claude/projects/`
-3. The new encoded directory does NOT already exist (to avoid overwriting)
-
-If the new encoded directory already has data, warn the user and ask how to
-proceed — this means the new location already has its own sessions.
-
-### Step 4: Dry run
-
-Always run the script in dry-run mode first:
+Always start with a dry run. The script detects the on-disk state and prints
+exactly what it would do:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/link-claude-project/scripts/link-claude-project.py" \
   "<old-path>" "<new-path>" --dry-run
 ```
 
-Present the dry-run output to the user. Explain what will happen:
+The script prints a `State:` line. Possible states and the action each
+implies:
 
-- **Storage directory rename** — moves project data (sessions, subagent logs,
-  tool result cache, memories) to the new encoded path
-- **History update** — rewrites the `project` field in matching
-  `history.jsonl` entries so `--resume` and `--continue` find old sessions from
-  the new directory
+| State                      | Action                                                                |
+| -------------------------- | --------------------------------------------------------------------- |
+| `relink_only`              | Disk dir already at new path. Relink storage + history.               |
+| `needs_disk_rename`        | Disk dir still at old path. Re-run with `--rename-disk`.              |
+| `already_linked`           | Storage already at new path. Nothing to do.                           |
+| `identical`                | Old and new resolve to the same path. Halt.                           |
+| `old_storage_missing`      | No project storage for old path. Halt — check the old path.           |
+| `target_storage_occupied`  | Storage already exists at new path. Halt — manual merge needed.       |
+| `ambiguous`                | Both disk dirs exist. Halt — user must pick the truth.                |
+| `both_disk_missing`        | Neither disk dir exists. Halt — restore one first.                    |
 
-Ask the user to confirm before proceeding.
+### Step 3: Confirm and execute
 
-### Step 5: Execute
+Present the dry-run output and the planned changes (storage rename, history
+entry count, optional disk rename) to the user. Wait for confirmation.
 
-After user confirmation, run without `--dry-run`:
+For `relink_only`:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/link-claude-project/scripts/link-claude-project.py" \
   "<old-path>" "<new-path>"
 ```
 
-The script creates a backup at `~/.claude/history.jsonl.bak` before modifying
-history.
-
-### Step 6: Verify
-
-After execution, confirm success:
+For `needs_disk_rename`:
 
 ```bash
-# Storage directory exists at new location
-ls ~/.claude/projects/<new-encoded>/
-
-# History entries updated
-grep -c "<new-path>" ~/.claude/history.jsonl
-grep -c "<old-path>" ~/.claude/history.jsonl
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/link-claude-project/scripts/link-claude-project.py" \
+  "<old-path>" "<new-path>" --rename-disk
 ```
 
-Report to the user:
+The script runs steps in this order so any failure leaves a recoverable
+state:
 
-- Number of session files linked
-- Number of history entries updated
-- Remind them they can now use `--resume` and `--continue` from the new
-  directory
-- Note the backup location (`~/.claude/history.jsonl.bak`)
+1. Disk `mv` (only when `--rename-disk` is set; reversible by `mv` back).
+2. Storage directory rename (reversible by `mv` back).
+3. `history.jsonl` rewrite (backed up to `~/.claude/history.jsonl.bak`).
+
+If a step fails, the script halts before the next one runs.
+
+### Step 4: Report
+
+The script's final output is authoritative — relay it. Report:
+
+- The number of history entries rewritten (printed by the script).
+- That `--resume` and `--continue` will work from the new directory.
+- The backup location: `~/.claude/history.jsonl.bak`.
+- Reminder: editors, terminals, and shells with the old path cached may need
+  to be reopened.
+
+Do **not** run `grep -c "<old-path>" ~/.claude/history.jsonl` to verify —
+substring matches catch user-typed prompt text and produce false positives.
+The script counts `project` field rewrites authoritatively.
 
 ## Background: How Claude Code Stores Project Data
 
@@ -129,19 +131,19 @@ character with a hyphen: `/Users/me/My Project` becomes
 `~/.claude/projects/` where all project-specific data lives.
 
 The `project` field in `~/.claude/history.jsonl` stores the original absolute
-path and is what powers `--resume` (interactive session picker) and `--continue`
-(resume most recent session in current directory). Both filter by matching the
-current working directory against this field.
+path and is what powers `--resume` (interactive session picker) and
+`--continue` (resume most recent session in current directory). Both filter
+by matching the current working directory against this field.
 
 What is stored per project:
 
-| Data | Location | Impact of move |
-|---|---|---|
-| Session transcripts | `<encoded>/<uuid>.jsonl` | Orphaned — `--resume` cannot find them |
-| Subagent logs | `<encoded>/<uuid>/subagents/` | Orphaned with parent session |
-| Tool result cache | `<encoded>/<uuid>/tool-results/` | Orphaned with parent session |
-| Project memories | `<encoded>/memory/` | Lost — new directory starts fresh |
-| History entries | `~/.claude/history.jsonl` | Stale `project` field, no match on new path |
+| Data                | Location                              | Impact of move                                  |
+| ------------------- | ------------------------------------- | ----------------------------------------------- |
+| Session transcripts | `<encoded>/<uuid>.jsonl`              | Orphaned — `--resume` cannot find them          |
+| Subagent logs       | `<encoded>/<uuid>/subagents/`         | Orphaned with parent session                    |
+| Tool result cache   | `<encoded>/<uuid>/tool-results/`      | Orphaned with parent session                    |
+| Project memories    | `<encoded>/memory/`                   | Lost — new directory starts fresh               |
+| History entries     | `~/.claude/history.jsonl`             | Stale `project` field, no match on new path     |
 
 What is NOT affected (no action needed):
 
@@ -153,21 +155,26 @@ What is NOT affected (no action needed):
 
 ## Troubleshooting
 
-**"Old storage directory not found"** — The old path may not match exactly. List
-all project directories and look manually:
+**State `target_storage_occupied`** — The new location already has its own
+sessions. The script refuses to overwrite. Options:
+
+1. Manually merge: copy session files from the old encoded directory into
+   the new one.
+2. Back up the new encoded directory, remove it, then re-run the script.
+
+**State `ambiguous`** — Both old and new disk directories exist. Decide which
+is the truth (the other is likely a stale copy), remove or rename the loser,
+and re-run.
+
+**State `old_storage_missing`** — The old path may not match exactly. Encoding
+is ambiguous, so paths that look the same may differ in special characters.
+List all directories and look manually:
 
 ```bash
 ls ~/.claude/projects/
 ```
 
-**"New storage directory already exists"** — The user has already started new
-sessions from the new directory. The script refuses to overwrite. Options:
-
-1. Manually merge: copy session files from old to new directory
-2. Back up the new directory, delete it, then re-run the script
-
 **Encoding ambiguity** — Multiple original characters map to the same hyphen
-(`/`, space, `~`, `_`, `=`). The encoded name alone cannot uniquely reconstruct
-the original path. When helping users identify old directories, always check
-session content for confirmation rather than relying solely on decoding the
-directory name.
+(`/`, space, `~`, `_`, `=`). The encoded name alone cannot uniquely
+reconstruct the original path. When helping users identify old directories,
+check session content rather than relying on decoding the directory name.
