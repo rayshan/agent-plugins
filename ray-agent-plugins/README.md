@@ -21,7 +21,7 @@ Safety hooks and productivity skills for Claude Code.
 | `/ray-agent-plugins:name-files` | Cross-platform filename validation (safe characters, reserved names, length limits) |
 | `/ray-agent-plugins:macos-app-bootstrap` | Bootstrap a macOS desktop app using Swift Package Manager |
 | `/ray-agent-plugins:commit-push-pr-ray` | Commit, push, and open a PR with structured content (exec summary, changes, test coverage) |
-| `/ray-agent-plugins:link-claude-project` | Move/rename a project directory and reconnect its Claude Code sessions, memories, and history |
+| `/ray-agent-plugins:link-claude-project` | Manage Claude Code project storage: rename, move sessions between projects, list sessions |
 | `/ray-agent-plugins:setup-check-lsp` | Diagnose and test Claude Code LSP plugins (config, binaries, live testing) |
 | `/ray-agent-plugins:claude-session-export` | Export a Claude Code session transcript to a shareable markdown file |
 | `/ray-agent-plugins:export-x-article` | Export an X (Twitter) status or long-form article to a markdown file via the fxtwitter API |

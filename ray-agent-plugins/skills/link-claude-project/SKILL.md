@@ -4,104 +4,74 @@ description: This skill should be used when the user asks to "link a project",
   "rename a project", "rename Claude Code project", "give my project a new name",
   "reconnect project data", "fix project sessions", "recover old sessions",
   "migrate Claude Code project", "moved my project directory", "can't find my old
-  sessions", "resume not working after move", or mentions losing Claude Code
-  session history, memories, or project data after moving or renaming a directory.
-  Also use when the user mentions `--resume` or `--continue` not finding old
-  conversations after a directory change.
-argument-hint: <new-path> [old-path]
+  sessions", "resume not working after move", "move a session between projects",
+  "transfer a Claude Code session", "list sessions in a project", or mentions
+  losing Claude Code session history, memories, or project data after moving or
+  renaming a directory. Also use when the user mentions `--resume` or `--continue`
+  not finding old conversations after a directory change.
+argument-hint: <subcommand> [args...]
 allowed-tools: Bash(python3 *), Bash(ls *), Bash(find *), Bash(mv *), Read, Grep, Glob
 ---
 
 # Link Claude Code Project
 
-Reconnect a moved or renamed project directory to its existing Claude Code
-project data (sessions, memories, tool results). Claude Code stores project
+Manage Claude Code project storage and history. Claude Code stores project
 data under `~/.claude/projects/<encoded-path>/` and references the original
-absolute path in `~/.claude/history.jsonl`. When a directory moves, both
-references go stale, breaking `--resume`, `--continue`, and project memory.
+absolute path in the `project` field of `~/.claude/history.jsonl`. Both go
+stale when a directory moves or sessions need to be reattributed, breaking
+`--resume`, `--continue`, and project memory.
 
-The skill handles two flows symmetrically:
+The skill exposes three subcommands:
 
-- **Already moved/renamed.** The user has already `mv`'d the directory and now
-  wants the Claude Code data relinked.
-- **Pending rename.** The user wants the rename done and the data relinked in
-  one go.
+| Subcommand | Purpose |
+| ---------- | ------- |
+| `rename`   | Move all of a project's data and history to a new path. Optionally `mv` the disk dir. |
+| `move`     | Move specific session(s) from one project to another. Both projects continue to exist. |
+| `list`     | Show sessions in a project so the user can pick UUIDs to feed into `move`. |
 
-The script detects which case applies from on-disk state. The user's wording
-is only a tiebreaker.
+## Picking the right subcommand
 
-## Arguments
+| User intent                                                                | Use      |
+| -------------------------------------------------------------------------- | -------- |
+| "I moved/renamed my project, fix Claude Code"                              | `rename` |
+| "Rename project X to Y" (do the `mv` for me too)                           | `rename` with `--rename-disk` |
+| "Move my last session from project A to project B"                         | `move --last 1` |
+| "Move session UUID … to project X"                                         | `move --sessions <uuid>` |
+| "What sessions does project X have?"                                       | `list` |
 
-- `$0` — New project path (required). The intended/current location of the
-  project.
-- `$1` — Old project path (optional). The previous location.
+If the user wants every session of A moved to B, that's `rename` (semantically
+A becomes B), not `move`.
 
-## Workflow
+## Subcommand: `rename`
 
-### Step 1: Resolve paths
+### Workflow
 
-Resolve `$0` to an absolute path. If `$0` is not provided, ask the user.
-
-If `$1` is provided, use it. Otherwise help the user identify the old path:
-
-```bash
-ls ~/.claude/projects/ | grep -i "<fragment>"
-```
-
-The encoding replaces every non-alphanumeric character with a hyphen, so it
-is ambiguous (`/`, space, `~`, `_`, `=` all collapse). Show the encoded names
-alongside best-guess decoded paths and let the user pick. If multiple
-candidates remain, peek at session content:
-
-```bash
-find ~/.claude/projects/<candidate>/ -maxdepth 1 -name "*.jsonl" -exec head -1 {} \;
-```
-
-### Step 2: Preflight (dry-run)
-
-Always start with a dry run. The script detects the on-disk state and prints
-exactly what it would do:
+1. Resolve the new path (and old path; help the user identify it from
+   `ls ~/.claude/projects/`).
+2. Run with `--dry-run`. The script prints a `State:` line.
+3. Pick the action based on state (table below).
+4. Confirm with the user, then run without `--dry-run`.
+5. Relay the script's authoritative final output.
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/link-claude-project/scripts/link-claude-project.py" \
-  "<old-path>" "<new-path>" --dry-run
+  rename "<old-path>" "<new-path>" --dry-run
 ```
 
-The script prints a `State:` line. Possible states and the action each
-implies:
+### Rename states
 
-| State                      | Action                                                                |
-| -------------------------- | --------------------------------------------------------------------- |
-| `relink_only`              | Disk dir already at new path. Relink storage + history.               |
-| `needs_disk_rename`        | Disk dir still at old path. Re-run with `--rename-disk`.              |
-| `already_linked`           | Storage already at new path. Nothing to do.                           |
-| `identical`                | Old and new resolve to the same path. Halt.                           |
-| `old_storage_missing`      | No project storage for old path. Halt — check the old path.           |
-| `target_storage_occupied`  | Storage already exists at new path. Halt — manual merge needed.       |
-| `ambiguous`                | Both disk dirs exist. Halt — user must pick the truth.                |
-| `both_disk_missing`        | Neither disk dir exists. Halt — restore one first.                    |
+| State                     | Action                                                              |
+| ------------------------- | ------------------------------------------------------------------- |
+| `relink_only`             | Disk dir already at new path. Run without flags.                    |
+| `needs_disk_rename`       | Disk dir still at old path. Re-run with `--rename-disk`.            |
+| `already_linked`          | Storage already at new path. Nothing to do.                         |
+| `identical`               | Old and new resolve to the same path. Halt.                         |
+| `old_storage_missing`     | No project storage for old path. Halt — check the old path.         |
+| `target_storage_occupied` | Storage already exists at new path. Halt — manual merge needed.     |
+| `ambiguous`               | Both disk dirs exist. Halt — user must pick the truth.              |
+| `both_disk_missing`       | Neither disk dir exists. Halt — restore one first.                  |
 
-### Step 3: Confirm and execute
-
-Present the dry-run output and the planned changes (storage rename, history
-entry count, optional disk rename) to the user. Wait for confirmation.
-
-For `relink_only`:
-
-```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/link-claude-project/scripts/link-claude-project.py" \
-  "<old-path>" "<new-path>"
-```
-
-For `needs_disk_rename`:
-
-```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/link-claude-project/scripts/link-claude-project.py" \
-  "<old-path>" "<new-path>" --rename-disk
-```
-
-The script runs steps in this order so any failure leaves a recoverable
-state:
+### Order of operations (rename)
 
 1. Disk `mv` (only when `--rename-disk` is set; reversible by `mv` back).
 2. Storage directory rename (reversible by `mv` back).
@@ -109,15 +79,78 @@ state:
 
 If a step fails, the script halts before the next one runs.
 
-### Step 4: Report
+## Subcommand: `move`
+
+Move one or more sessions from one project's storage to another's. Both
+projects keep existing — only the named sessions migrate.
+
+### Workflow
+
+1. Run `list` on the source project so the user can see UUIDs and pick.
+2. Run `move --dry-run` with either explicit UUIDs or `--last N`.
+3. Confirm the planned moves with the user.
+4. Run without `--dry-run`.
+
+```bash
+# Pick UUIDs explicitly:
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/link-claude-project/scripts/link-claude-project.py" \
+  move "<src>" "<dst>" --sessions "<uuid1>,<uuid2>" --dry-run
+
+# Or take the N most recent:
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/link-claude-project/scripts/link-claude-project.py" \
+  move "<src>" "<dst>" --last 1 --dry-run
+```
+
+`--sessions` and `--last` are mutually exclusive; one is required.
+
+### Move states
+
+| State                       | Action                                                             |
+| --------------------------- | ------------------------------------------------------------------ |
+| `ok`                        | Proceed with the move.                                             |
+| `no_sessions_selected`      | Empty selection. Pass `--sessions` or `--last`.                    |
+| `src_dst_identical`         | Source and destination are the same path. Halt.                    |
+| `src_storage_missing`       | No project storage for source. Halt — check the source path.       |
+| `dst_disk_missing`          | Destination dir doesn't exist on disk. Halt — `--resume` needs it. |
+| `session_not_found`         | A requested UUID isn't in source storage. Halt with the bad list.  |
+| `session_already_in_target` | Target already has a session with that UUID. Halt with the list.   |
+| `active_session`            | A requested UUID is currently running. Halt — would corrupt state. |
+
+### Order of operations (move)
+
+1. Per-session file moves (jsonl + the optional `<uuid>/` subdir holding
+   `tool-results/` / `subagents/`). Rolled back in reverse order if a later
+   move in the batch fails.
+2. `history.jsonl` rewrite — only entries where both `project == src` and
+   `sessionId ∈ {moved UUIDs}` are rewritten. Backup at
+   `~/.claude/history.jsonl.bak`.
+
+`~/.claude/session-env/<uuid>/` stays put — it's keyed by session UUID, not
+by project path. `--resume` finds it by sessionId regardless of project.
+
+## Subcommand: `list`
+
+Show sessions in a project so UUIDs and first-message context are visible.
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/link-claude-project/scripts/link-claude-project.py" \
+  list "<project-path>"
+```
+
+Columns: UUID, mtime, size, flags, first user message. Flags are three
+characters: `T` if `tool-results/` exists, `S` if `subagents/` exists, `A`
+if the session is currently running.
+
+## Reporting back
 
 The script's final output is authoritative — relay it. Report:
 
-- The number of history entries rewritten (printed by the script).
-- That `--resume` and `--continue` will work from the new directory.
-- The backup location: `~/.claude/history.jsonl.bak`.
-- Reminder: editors, terminals, and shells with the old path cached may need
-  to be reopened.
+- Number of history entries rewritten or sessions moved (printed by the script).
+- That `--resume` and `--continue` work from the new directory (rename) or
+  destination project (move).
+- Backup location: `~/.claude/history.jsonl.bak`.
+- For `rename`: editors, terminals, and shells with the old path cached may
+  need to be reopened.
 
 Do **not** run `grep -c "<old-path>" ~/.claude/history.jsonl` to verify —
 substring matches catch user-typed prompt text and produce false positives.
@@ -142,37 +175,43 @@ What is stored per project:
 | Session transcripts | `<encoded>/<uuid>.jsonl`              | Orphaned — `--resume` cannot find them          |
 | Subagent logs       | `<encoded>/<uuid>/subagents/`         | Orphaned with parent session                    |
 | Tool result cache   | `<encoded>/<uuid>/tool-results/`      | Orphaned with parent session                    |
-| Project memories    | `<encoded>/memory/`                   | Lost — new directory starts fresh               |
+| Project memories    | `<encoded>/memory/`                   | Lost — new directory starts fresh (project-level, not session-level) |
 | History entries     | `~/.claude/history.jsonl`             | Stale `project` field, no match on new path     |
 
 What is NOT affected (no action needed):
 
 - Plan files (`~/.claude/plans/`) — global, not path-keyed
 - File history (`~/.claude/file-history/`) — keyed by content hash
-- Active sessions (`~/.claude/sessions/`) — only tracks running PIDs
-- `cwd` fields inside session transcripts — historical records only, not used
-  for lookup
+- Session env (`~/.claude/session-env/<uuid>/`) — UUID-keyed, found by sessionId
+- Active session tracker (`~/.claude/sessions/<pid>.json`) — PID-keyed
+- `cwd` fields inside session transcripts — historical records only
 
 ## Troubleshooting
 
-**State `target_storage_occupied`** — The new location already has its own
-sessions. The script refuses to overwrite. Options:
+**`target_storage_occupied`** (rename) — The new location already has its
+own sessions. The script refuses to overwrite. Either manually merge session
+files into the existing encoded directory, or back up the new encoded
+directory, remove it, and re-run.
 
-1. Manually merge: copy session files from the old encoded directory into
-   the new one.
-2. Back up the new encoded directory, remove it, then re-run the script.
+**`ambiguous`** (rename) — Both old and new disk directories exist. Decide
+which is the truth (the other is likely a stale copy), remove or rename the
+loser, and re-run.
 
-**State `ambiguous`** — Both old and new disk directories exist. Decide which
-is the truth (the other is likely a stale copy), remove or rename the loser,
-and re-run.
-
-**State `old_storage_missing`** — The old path may not match exactly. Encoding
-is ambiguous, so paths that look the same may differ in special characters.
-List all directories and look manually:
+**`old_storage_missing`** / **`src_storage_missing`** — The path may not
+match exactly. Encoding is ambiguous, so paths that look the same may differ
+in special characters. List directories manually:
 
 ```bash
 ls ~/.claude/projects/
 ```
+
+**`session_already_in_target`** (move) — A session with the same UUID
+already exists in the destination. Move it under a different project, or
+inspect both files and decide which to keep.
+
+**`active_session`** (move) — A session is currently running. Either pick a
+different session, wait for the running session to end, or shut down the
+client first.
 
 **Encoding ambiguity** — Multiple original characters map to the same hyphen
 (`/`, space, `~`, `_`, `=`). The encoded name alone cannot uniquely
